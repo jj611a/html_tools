@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Image - Windows 98 Theme</title>
+    <style>
+        body {
+            background-color: #c0c0c0;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .window {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px;
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            flex-grow: 1;
+        }
+
+        .title-bar {
+            background-color: #000080;
+            color: white;
+            padding: 3px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .window-body {
+            padding: 10px;
+            background-color: #c0c0c0;
+        }
+
+        .button {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        .button:disabled {
+            background-color: #808080;
+            cursor: not-allowed;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            margin: 10px 0;
+            padding: 5px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            box-sizing: border-box;
+        }
+
+        #output {
+            margin-top: 10px;
+            background-color: white;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            overflow: hidden;
+            position: relative;
+            
+        }
+
+        #output img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+        }
+
+        /* Loading spinner styles */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000080;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #000;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 100%;
+            border: 2px solid #808080;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .footer {
+            background-color: #c0c0c0;
+            border-top: 2px solid #808080;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+
+        .footer a {
+            color: #000080;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">Text to Image Generator</div>
+        <div class="window-body">
+            <input type="text" id="textInput" placeholder="Enter text here">
+            <button id="generateButton" class="button" onclick="generateImage()">Generate Image</button>
+            <div id="output">Image will appear here</div>
+            <div id="imageOptions" style="display: none;">
+                <button class="button" onclick="viewFullScreen()">View Full Screen</button>
+                <button class="button" onclick="downloadImage()">Download Image</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for full screen view -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">Close</span>
+            <img id="modalImage" src="" alt="Full Screen Image">
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2025 Zero. <a href="https://t.me/o_0x7">Contact Us</a>
+    </div>
+
+    <script>
+let currentImageUrl="";async function generateImage(){const e=document.getElementById("textInput").value,t=document.getElementById("output"),n=document.getElementById("imageOptions"),a=document.getElementById("generateButton");a.disabled=!0,t.innerHTML='<div class="spinner"></div>';const o={Authorization:"Bearer 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","Content-Type":"application/json"},l={inputs:e};try{const r=await fetch("https://api-inference.huggingface.co/models/ZB-Tech/Text-to-Image",{method:"POST",headers:o,body:JSON.stringify(l)});if(r.ok){const e=await r.blob();currentImageUrl=URL.createObjectURL(e),t.innerHTML=`<img src="${currentImageUrl}" alt="Generated Image" />`,n.style.display="block"}else{const e=await r.text();t.innerHTML=`<p>Error: ${r.status}, ${e}</p>`,n.style.display="none"}}catch(e){t.innerHTML=`<p>Error: ${e.message}</p>`,n.style.display="none"}finally{a.disabled=!1}}function viewFullScreen(){if(currentImageUrl){const e=document.getElementById("imageModal");document.getElementById("modalImage").src=currentImageUrl,e.style.display="flex"}}function closeModal(){document.getElementById("imageModal").style.display="none"}function downloadImage(){if(currentImageUrl){const e=document.createElement("a");e.href=currentImageUrl,e.download="generated_image.png",document.body.appendChild(e),e.click(),document.body.removeChild(e)}}
+    </script>
+</body>
+</html>

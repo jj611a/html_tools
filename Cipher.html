@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 98 Cipher Converter</title>
+    <style>
+        body {
+            background-color: #c0c0c0;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .window {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px;
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            flex-grow: 1;
+        }
+
+        .title-bar {
+            background-color: #000080;
+            color: white;
+            padding: 3px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar-text {
+            margin-left: 3px;
+        }
+
+        .window-body {
+            padding: 10px;
+            background-color: #c0c0c0;
+        }
+
+        .button {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        .input-field {
+            width: 100%;
+            margin: 10px 0;
+            padding: 5px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            resize: none;
+            height: 100px;
+            box-sizing: border-box;
+        }
+
+        .result {
+            margin-top: 10px;
+            padding: 5px;
+            background-color: white;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            word-break: break-all;
+            min-height: 50px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            margin: 10px 0;
+            padding: 5px;
+            background-color: #ffffff;
+            border: 1px solid #808080;
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .notification .title-bar {
+            background-color: #000080;
+            color: white;
+            padding: 3px 6px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-content {
+            padding: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .notification-buttons {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .error-icon {
+            color: red;
+            font-weight: bold;
+            font-size: 20px;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid red;
+            border-radius: 50%;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            background-color: #c0c0c0;
+            border-bottom: 2px solid #808080;
+            padding: 5px;
+        }
+
+        .nav-item {
+            margin: 0 10px;
+            cursor: pointer;
+            padding: 5px;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+        }
+
+        .nav-item.active {
+            background-color: #000080;
+            color: white;
+        }
+
+        .shift-input {
+            display: none;
+            margin: 10px 0;
+        }
+
+        .footer {
+            background-color: #c0c0c0;
+            border-top: 2px solid #808080;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+
+        .footer a {
+            color: #000080;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <div class="title-bar-text">Cipher Converter</div>
+            <div style="font-size: 12px;">?</div>
+        </div>
+        <div class="nav-bar">
+            <div class="nav-item active" onclick="selectCipher('morse')">Morse Code</div>
+            <div class="nav-item" onclick="selectCipher('caesar')">Caesar Cipher</div>
+            <div class="nav-item" onclick="selectCipher('base64')">Base64</div>
+        </div>
+        <div class="window-body">
+            <form id="cipherForm">
+                <label for="text">Enter text:</label>
+                <textarea class="input-field" id="text" name="text" rows="4" placeholder="Type text here..."></textarea>
+                
+                <div class="shift-input" id="shiftInput">
+                    <label for="shift">Shift value:</label>
+                    <input type="number" id="shift" name="shift" value="3" min="1" max="25" class="input-field" style="width: 50px; height: 20px;">
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="button" onclick="convert('encode')">Encode</button>
+                    <button type="button" class="button" onclick="convert('decode')">Decode</button>
+                </div>
+                
+                <div class="help-text" id="helpText">
+                    Morse Code Format: Use dots (.) and dashes (-)<br>
+                    Separate letters with spaces, words with double spaces<br>
+                    Example: ... --- ...  (SOS)
+                </div>
+                
+                <div class="result" id="result">
+                    Result will appear here...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="notification" id="errorNotification">
+        <div class="title-bar">
+            <div class="title-bar-text">Error</div>
+            <div style="font-size: 12px; cursor: pointer;" onclick="closeNotification()">×</div>
+        </div>
+        <div class="notification-content">
+            <div class="error-icon">×</div>
+            <div id="errorMessage">Error message here</div>
+        </div>
+        <div class="notification-buttons">
+            <button class="button" onclick="closeNotification()">OK</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2025 Zero. <a href="https://t.me/o_0x7">Contact Us</a>
+    </div>
+
+    <script>
+        const morseCode = {
+            'A': '.-',    'B': '-...',  'C': '-.-.', 'D': '-..',
+            'E': '.',     'F': '..-.',  'G': '--.',  'H': '....',
+            'I': '..',    'J': '.---',  'K': '-.-',  'L': '.-..',
+            'M': '--',    'N': '-.',    'O': '---',  'P': '.--.',
+            'Q': '--.-',  'R': '.-.',   'S': '...',  'T': '-',
+            'U': '..-',   'V': '...-',  'W': '.--',  'X': '-..-',
+            'Y': '-.--',  'Z': '--..',  '0': '-----','1': '.----',
+            '2': '..---', '3': '...--', '4': '....-','5': '.....',
+            '6': '-....', '7': '--...', '8': '---..','9': '----.',
+            '.': '.-.-.-',',': '--..--',' ': ' '
+        };
+
+        let currentCipher = 'morse';
+
+        function showError(message) {
+            const notification = document.getElementById('errorNotification');
+            document.getElementById('errorMessage').textContent = message;
+            notification.style.display = 'block';
+        }
+
+        function closeNotification() {
+            document.getElementById('errorNotification').style.display = 'none';
+        }
+
+        function selectCipher(cipher) {
+            currentCipher = cipher;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`.nav-item[onclick="selectCipher('${cipher}')"]`).classList.add('active');
+            updateHelpText();
+            document.getElementById('shiftInput').style.display = cipher === 'caesar' ? 'block' : 'none';
+        }
+
+        function updateHelpText() {
+            const helpText = document.getElementById('helpText');
+            if (currentCipher === 'morse') {
+                helpText.innerHTML = 'Morse Code Format: Use dots (.) and dashes (-)<br>Separate letters with spaces, words with double spaces<br>Example: ... --- ...  (SOS)';
+            } else if (currentCipher === 'caesar') {
+                helpText.innerHTML = 'Caesar Cipher: Shift letters by a fixed number of positions in the alphabet.<br>Example: A becomes D with a shift of 3.';
+            } else if (currentCipher === 'base64') {
+                helpText.innerHTML = 'Base64: Encode binary data into ASCII characters.<br>Commonly used for encoding data in URLs and email attachments.';
+            }
+        }
+
+        function convert(action) {
+            const text = document.getElementById('text').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!text.trim()) {
+                showError('Please enter some text to convert');
+                return;
+            }
+            
+            resultDiv.textContent = 'Converting...';
+            
+            try {
+                let result = '';
+                if (currentCipher === 'morse') {
+                    result = convertMorse(text, action);
+                } else if (currentCipher === 'caesar') {
+                    const shift = parseInt(document.getElementById('shift').value, 10);
+                    result = convertCaesar(text, action, shift);
+                } else if (currentCipher === 'base64') {
+                    result = convertBase64(text, action);
+                }
+                
+                if (result) {
+                    resultDiv.textContent = result;
+                } else {
+                    showError('No result. Please check your input.');
+                    resultDiv.textContent = 'Result will appear here...';
+                }
+            } catch (error) {
+                console.error('Error details:', error);
+                showError(error.message || 'Error converting text. Please try again.');
+                resultDiv.textContent = 'Result will appear here...';
+            }
+        }
+
+        function convertMorse(text, action) {
+            if (action === 'encode') {
+                const chars = text.toUpperCase().split('');
+                return chars.map(char => morseCode[char] || '').join(' ');
+            } else {
+                const morseChars = text.split(' ');
+                const flippedMorse = Object.fromEntries(Object.entries(morseCode).map(([k, v]) => [v, k]));
+                return morseChars.map(morse => flippedMorse[morse] || '').join('');
+            }
+        }
+
+        function convertCaesar(text, action, shift) {
+            return text.split('').map(char => {
+                if (/[a-zA-Z]/.test(char)) {
+                    const base = char.charCodeAt(0) < 97 ? 65 : 97;
+                    const offset = action === 'encode' ? shift : -shift;
+                    return String.fromCharCode(((char.charCodeAt(0) - base + offset + 26) % 26) + base);
+                }
+                return char;
+            }).join('');
+        }
+
+        function convertBase64(text, action) {
+            if (action === 'encode') {
+                return btoa(text);
+            } else {
+                try {
+                    return atob(text);
+                } catch (e) {
+                    showError('Invalid Base64 input');
+                    return '';
+                }
+            }
+        }
+
+        // Close notification when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeNotification();
+            }
+        });
+
+        // Initialize help text
+        updateHelpText();
+    </script>
+</body>
+</html>
